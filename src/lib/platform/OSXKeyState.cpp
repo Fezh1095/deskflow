@@ -28,6 +28,11 @@ static const uint32_t s_superVK = kVK_Command;
 static const uint32_t s_capsLockVK = kVK_CapsLock;
 static const uint32_t s_numLockVK = kVK_ANSI_KeypadClear; // 71
 
+static const uint32_t s_rightShiftVK = kVK_RightShift;       // 0x3C
+static const uint32_t s_rightControlVK = kVK_RightControl;   // 0x3E
+static const uint32_t s_rightAltVK = kVK_RightOption;        // 0x3D
+static const uint32_t s_rightSuperVK = kVK_RightCommand;     // 0x36
+
 static const uint32_t s_brightnessUp = 144;
 static const uint32_t s_brightnessDown = 145;
 static const uint32_t s_missionControlVK = 160;
@@ -98,15 +103,15 @@ static const KeyEntry s_controlKeys[] = {
     // modifier keys.  OS X doesn't seem to support right handed versions
     // of modifier keys so we map them to the left handed versions.
     {kKeyShift_L, s_shiftVK},
-    {kKeyShift_R, s_shiftVK}, // 60
+    {kKeyShift_R, s_rightShiftVK}, // 60
     {kKeyControl_L, s_controlVK},
-    {kKeyControl_R, s_controlVK}, // 62
+    {kKeyControl_R, s_rightControlVK}, // 62
     {kKeyAlt_L, s_altVK},
-    {kKeyAlt_R, s_altVK},
+    {kKeyAlt_R, s_rightAltVK},
     {kKeySuper_L, s_superVK},
-    {kKeySuper_R, s_superVK}, // 61
+    {kKeySuper_R, s_rightSuperVK}, // 61
     {kKeyMeta_L, s_superVK},
-    {kKeyMeta_R, s_superVK}, // 61
+    {kKeyMeta_R, s_rightSuperVK}, // 61
 
     // toggle modifiers
     {kKeyNumLock, s_numLockVK},
