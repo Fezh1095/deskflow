@@ -815,23 +815,97 @@ bool OSXKeyState::mapDeskflowHotKeyToMac(
   return true;
 }
 
-void OSXKeyState::handleModifierKeys(void *target, KeyModifierMask oldMask, KeyModifierMask newMask)
+void OSXKeyState::handleModifierKeys(void *target, KeyModifierMask oldMask, KeyModifierMask newMask, uint32_t virtualKey)
 {
   // compute changed modifiers
   KeyModifierMask changed = (oldMask ^ newMask);
 
+  LOG_DEBUG1("handleModifierKeys: virtualKey=0x%x, changed=0x%x, oldMask=0x%x, newMask=0x%x",
+            virtualKey, changed, oldMask, newMask);
+
   // synthesize changed modifier keys
   if ((changed & KeyModifierShift) != 0) {
-    handleModifierKey(target, s_shiftVK, kKeyShift_L, (newMask & KeyModifierShift) != 0, newMask);
+    bool shiftDown = ((newMask & KeyModifierShift) != 0);
+
+    // Check the actual virtual key code to determine left or right
+    if (virtualKey == s_shiftVK) {
+      // Left Shift
+      LOG_DEBUG1("Left Shift %s", shiftDown ? "DOWN" : "UP");
+      handleModifierKey(target, s_shiftVK, kKeyShift_L, shiftDown, newMask);
+    } else if (virtualKey == s_rightShiftVK) {
+      // Right Shift
+      LOG_DEBUG1("Right Shift %s", shiftDown ? "DOWN" : "UP");
+      handleModifierKey(target, s_rightShiftVK, kKeyShift_R, shiftDown, newMask);
+    } else {
+      // Fallback if virtualKey is not provided or unknown
+      LOG_DEBUG1("Shift changed (unknown side): down=%d", shiftDown);
+      if (shiftDown) {
+        handleModifierKey(target, s_shiftVK, kKeyShift_L, true, newMask);
+      } else {
+        handleModifierKey(target, s_shiftVK, kKeyShift_L, false, newMask);
+        handleModifierKey(target, s_rightShiftVK, kKeyShift_R, false, newMask);
+      }
+    }
   }
   if ((changed & KeyModifierControl) != 0) {
-    handleModifierKey(target, s_controlVK, kKeyControl_L, (newMask & KeyModifierControl) != 0, newMask);
+    bool ctrlDown = ((newMask & KeyModifierControl) != 0);
+
+    if (virtualKey == s_controlVK) {
+      // Left Control
+      LOG_DEBUG1("Left Control %s", ctrlDown ? "DOWN" : "UP");
+      handleModifierKey(target, s_controlVK, kKeyControl_L, ctrlDown, newMask);
+    } else if (virtualKey == s_rightControlVK) {
+      // Right Control
+      LOG_DEBUG1("Right Control %s", ctrlDown ? "DOWN" : "UP");
+      handleModifierKey(target, s_rightControlVK, kKeyControl_R, ctrlDown, newMask);
+    } else {
+      if (ctrlDown) {
+        handleModifierKey(target, s_controlVK, kKeyControl_L, true, newMask);
+      } else {
+        handleModifierKey(target, s_controlVK, kKeyControl_L, false, newMask);
+        handleModifierKey(target, s_rightControlVK, kKeyControl_R, false, newMask);
+      }
+    }
   }
   if ((changed & KeyModifierAlt) != 0) {
-    handleModifierKey(target, s_altVK, kKeyAlt_L, (newMask & KeyModifierAlt) != 0, newMask);
+    bool altDown = ((newMask & KeyModifierAlt) != 0);
+
+    if (virtualKey == s_altVK) {
+      // Left Alt/Option
+      LOG_DEBUG1("Left Alt %s", altDown ? "DOWN" : "UP");
+      handleModifierKey(target, s_altVK, kKeyAlt_L, altDown, newMask);
+    } else if (virtualKey == s_rightAltVK) {
+      // Right Alt/Option
+      LOG_DEBUG1("Right Alt %s", altDown ? "DOWN" : "UP");
+      handleModifierKey(target, s_rightAltVK, kKeyAlt_R, altDown, newMask);
+    } else {
+      if (altDown) {
+        handleModifierKey(target, s_altVK, kKeyAlt_L, true, newMask);
+      } else {
+        handleModifierKey(target, s_altVK, kKeyAlt_L, false, newMask);
+        handleModifierKey(target, s_rightAltVK, kKeyAlt_R, false, newMask);
+      }
+    }
   }
   if ((changed & KeyModifierSuper) != 0) {
-    handleModifierKey(target, s_superVK, kKeySuper_L, (newMask & KeyModifierSuper) != 0, newMask);
+    bool cmdDown = ((newMask & KeyModifierSuper) != 0);
+
+    if (virtualKey == s_superVK) {
+      // Left Command
+      LOG_DEBUG1("Left Command %s", cmdDown ? "DOWN" : "UP");
+      handleModifierKey(target, s_superVK, kKeySuper_L, cmdDown, newMask);
+    } else if (virtualKey == s_rightSuperVK) {
+      // Right Command
+      LOG_DEBUG1("Right Command %s", cmdDown ? "DOWN" : "UP");
+      handleModifierKey(target, s_rightSuperVK, kKeySuper_R, cmdDown, newMask);
+    } else {
+      if (cmdDown) {
+        handleModifierKey(target, s_superVK, kKeySuper_L, true, newMask);
+      } else {
+        handleModifierKey(target, s_superVK, kKeySuper_L, false, newMask);
+        handleModifierKey(target, s_rightSuperVK, kKeySuper_R, false, newMask);
+      }
+    }
   }
   if ((changed & KeyModifierCapsLock) != 0) {
     handleModifierKey(target, s_capsLockVK, kKeyCapsLock, (newMask & KeyModifierCapsLock) != 0, newMask);

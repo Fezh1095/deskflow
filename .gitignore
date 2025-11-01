@@ -36,9 +36,17 @@ CMakeLists.txt.user
 CMakeCache.txt
 CMakeUserPresets.json
 CMakeFiles/*
+cmake-build-*/
+cmake-buil-debug/
+cmake-trace.log
 
-# vscode folder
+# IDE folders
 /.vscode
+.idea/
+
+# Build artifacts
+*.dmg
+*.app
 
 # scripts folder
 /scripts

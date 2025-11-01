@@ -129,12 +129,14 @@ macro(configure_unix_libs)
 
   endif()
 
-  # pthread is used on both Linux and Mac
-  check_library_exists("pthread" pthread_create "" HAVE_PTHREAD)
-  if(HAVE_PTHREAD)
-    list(APPEND libs pthread)
-  else()
-    message(FATAL_ERROR "Missing library: pthread")
+  # pthread is used on Linux and BSD, but not needed on macOS (it's part of system library)
+  if(NOT APPLE)
+    check_library_exists("pthread" pthread_create "" HAVE_PTHREAD)
+    if(HAVE_PTHREAD)
+      list(APPEND libs pthread)
+    else()
+      message(FATAL_ERROR "Missing library: pthread")
+    endif()
   endif()
 
   # Check if <format> header is available
@@ -155,7 +157,20 @@ macro(configure_unix_libs)
   endif()
 
   if(APPLE)
+    # Ensure SDK path is set correctly
+    if(NOT CMAKE_OSX_SYSROOT)
+      execute_process(
+        COMMAND xcrun --show-sdk-path
+        OUTPUT_VARIABLE CMAKE_OSX_SYSROOT
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+      )
+    endif()
+
     set(CMAKE_CXX_FLAGS "--sysroot ${CMAKE_OSX_SYSROOT} ${CMAKE_CXX_FLAGS} -DGTEST_USE_OWN_TR1_TUPLE=1")
+
+    # Ensure linker can find system libraries including libc++
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L${CMAKE_OSX_SYSROOT}/usr/lib")
+
     find_library(lib_ScreenSaver ScreenSaver)
     find_library(lib_IOKit IOKit)
     find_library(lib_ApplicationServices ApplicationServices)
